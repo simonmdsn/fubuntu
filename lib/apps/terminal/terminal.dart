@@ -164,7 +164,10 @@ class TerminalState extends ConsumerState<Terminal> {
                                   TextSpan(text: null, children: [
                                     ...outputs.map((e) => TextSpan(
                                         text: e.text,
-                                        children: e.children,
+                                        children: e.children?.map((e) {
+                                          e as TextSpan;
+                                          return TextSpan(text: e.text, style: e.style?.copyWith(fontSize: textStyle.fontSize));
+                                        }).toList(),
                                         style: e.style?.copyWith(fontSize: textStyle.fontSize)))
                                   ]),
                                 )
