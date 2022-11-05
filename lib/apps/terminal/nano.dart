@@ -24,16 +24,21 @@ class _NanoState extends ConsumerState<Nano> {
 
   final textInputFocusNode = FocusNode();
 
+  late final windowListener = () => setState(() {});
+
   @override
   void initState() {
     super.initState();
     textInputController.text = widget.file?.readAsStringSync() ?? "";
-    widget.state.widget.window.windowProperties.addListener(() {
-      setState(() {});
-    });
+    widget.state.widget.window.windowProperties.addListener(windowListener);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       textInputFocusNode.requestFocus();
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -53,8 +58,9 @@ class _NanoState extends ConsumerState<Nano> {
           ),
           _NanoExitIntent: CallbackAction<_NanoExitIntent>(
             onInvoke: (intent) {
+              widget.state.widget.window.windowProperties.removeListener(windowListener);
+              widget.state.overlays.remove(widget);
               widget.state.setState(() {
-                widget.state.overlays.remove(widget);
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                   widget.state.terminalScrollController.jumpTo(widget.state.terminalScrollController.position.maxScrollExtent);
                 });
