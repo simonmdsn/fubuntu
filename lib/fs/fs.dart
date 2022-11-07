@@ -22,17 +22,17 @@ class FS {
     versionFile.writeAsString("1.0.0");
 
     root.childFile('meow.dart').writeAsString('''
-    class Cat {
-        Cat(this.name);
-        final String name;
-        String speak() {
-          return name;
-        }
-      }
-      String main() {
-        final cat = Cat('Fluffy');
-        return cat.speak();
-      }
+class Cat {
+  Cat(this.name);
+  final String name;
+  String speak() {
+    return name;
+  }
+}
+String main() {
+  final cat = Cat('Fluffy');
+  return cat.speak();
+}
       ''');
 
     for (var value in _toDoOnStart) {
