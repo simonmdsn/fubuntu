@@ -19,6 +19,7 @@ class TerminalCommands {
     ECHO(),
     SLEEP(),
     DART(),
+    CLEAR(),
   ];
 }
 
@@ -73,7 +74,10 @@ class NANO extends TerminalCommand {
   @override
   Stream<TextSpan> run(
       String command, List<String> args, ListQueue<Widget> overlays, TerminalState state) async* {
-    overlays.add(Nano(state, file: FS.fileSystem.file(state.cwd.path + args.first),));
+    overlays.add(Nano(
+      state,
+      file: FS.fileSystem.file(state.cwd.path + args.first),
+    ));
     yield const TextSpan(text: "");
   }
 }
@@ -187,3 +191,12 @@ class DART extends TerminalCommand {
   }
 }
 
+class CLEAR extends TerminalCommand {
+  CLEAR() : super(command: "clear");
+
+  @override
+  Stream<TextSpan> run(
+      String command, List<String> args, ListQueue<Widget> overlays, TerminalState state) async* {
+      state.outputs.clear();
+  }
+}
