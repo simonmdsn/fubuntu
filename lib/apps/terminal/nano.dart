@@ -47,6 +47,12 @@ class _NanoState extends ConsumerState<Nano> {
       shortcuts: {
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS): _NanoSaveIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyX): _NanoExitIntent(),
+        LogicalKeySet(LogicalKeyboardKey.zoomIn): const ZoomIntent(2),
+        LogicalKeySet(LogicalKeyboardKey.zoomOut): const ZoomIntent(-2),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.add):
+        const ZoomIntent(2),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.minus):
+        const ZoomIntent(-2),
       },
       child: Actions(
         actions: {
@@ -67,7 +73,14 @@ class _NanoState extends ConsumerState<Nano> {
               });
               return null;
             },
-          )
+          ),
+          ZoomIntent: CallbackAction<ZoomIntent>(onInvoke: (intent) {
+            setState(() {
+              widget.state.textStyle =
+                  widget.state.textStyle.copyWith(fontSize: (widget.state.textStyle.fontSize ?? 14) + intent.zoom);
+            });
+            return null;
+          }),
         },
         child: Container(
           color: const Color(0xFF380C2A),
