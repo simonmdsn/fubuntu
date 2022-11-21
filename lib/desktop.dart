@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:fubuntu/apps/desktop_dock.dart';
 import 'package:fubuntu/apps/terminal/terminal.dart';
 import 'package:fubuntu/desktop_clock.dart';
 
@@ -111,52 +112,7 @@ class DesktopState extends ConsumerState<Desktop> {
                             ),
                           ),
                         ),
-                        AnimatedPositioned(
-                          bottom: inDockArea || showDock ? 5 : -50,
-                          duration: const Duration(milliseconds: 200),
-                          child: MouseRegion(
-                            onEnter: (enter) => onDockAreaEntered(enter),
-                            onExit: (exit) => onDockAreaExited(exit),
-                            child: inDockArea || showDock
-                                ? Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(16.0),
-                                        color: const Color(0xFF2C2828),
-                                        border: Border.all(color: Colors.grey)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: windowManager
-                                            .map((e) => Tooltip(
-                                                  message: e.windowProperties.application.hashCode
-                                                      .toString(),
-                                                  waitDuration: const Duration(milliseconds: 250),
-                                                  verticalOffset: 35,
-                                                  preferBelow: false,
-                                                  child: Material(
-                                                    color: Colors.transparent,
-                                                    type: MaterialType.button,
-                                                    child: IconButton(
-                                                      icon: Icon(
-                                                          e.windowProperties.application?.icon),
-                                                      hoverColor: Colors.grey,
-                                                      splashRadius: 35,
-                                                      iconSize: 36,
-                                                      onPressed: () {
-                                                        windowManagerNotifier.putWindowToFront(e);
-                                                      },
-                                                    ),
-                                                  ),
-                                                ))
-                                            .toList(),
-                                      ),
-                                    ),
-                                  )
-                                : Container(),
-                          ),
-                        ),
+                        DesktopDock(showDock: showDock),
                       ],
                     ),
                   ],
@@ -181,17 +137,6 @@ class DesktopState extends ConsumerState<Desktop> {
     });
   }
 
-  onDockAreaEntered(PointerEnterEvent enter) {
-    setState(() {
-      inDockArea = true;
-    });
-  }
-
-  onDockAreaExited(PointerExitEvent exit) {
-    setState(() {
-      inDockArea = false;
-    });
-  }
 }
 
 class WindowManagerNotifier extends StateNotifier<List<Window>> {
@@ -567,8 +512,9 @@ class WindowState extends ConsumerState<Window> {
 abstract class Application extends ConsumerStatefulWidget {
   final FocusNode focusNode;
   final IconData icon;
+  final String appName;
 
-  const Application({super.key, required this.focusNode, required this.icon});
+  const Application({super.key, required this.appName, required this.focusNode, required this.icon});
 }
 
 class LoggingActionDispatcher extends ActionDispatcher {

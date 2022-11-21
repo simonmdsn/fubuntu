@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fubuntu/desktop.dart';
 
 class TestApp extends Application {
-  TestApp({super.key}) : super(focusNode: FocusNode(),icon: Icons.question_mark);
+  TestApp({super.key}) : super(focusNode: FocusNode(),icon: Icons.question_mark,appName: "TestApp");
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => TestAppState();

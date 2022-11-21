@@ -44,7 +44,7 @@ class Terminal extends Application {
   final String startDirectory;
 
   Terminal({Key? key, required this.window, this.startDirectory = "~"})
-      : super(key: GlobalKey(), focusNode: FocusNode(), icon: Icons.terminal);
+      : super(key: GlobalKey(),appName: "Terminal", focusNode: FocusNode(), icon: Icons.terminal);
 
   @override
   ConsumerState createState() => TerminalState();
@@ -184,74 +184,7 @@ class TerminalState extends ConsumerState<Terminal> {
                                   // cursorWidth: 10,
                                   // cursorHeight: 14,
                                   enableInteractiveSelection: false,
-                                  onSubmitted: (command) {
-                                    setState(() {
-                                      if (outputs.isNotEmpty) {
-                                        outputs.add(const TextSpan(text: "\n"));
-                                      }
-                                      outputs.add(_prefix);
-                                      outputs.add(TextSpan(
-                                        text: command,
-                                        style: GoogleFonts.ubuntuMono()
-                                            .copyWith(color: Colors.white, fontSize: 16),
-                                      ));
-                                    });
-                                    if (command.isNotEmpty) {
-                                      var split = command.split(" ");
-                                      command = split.removeAt(0);
-                                      Stream<TextSpan>? stream = TerminalCommands.commands
-                                          .firstWhere((element) => element.command == command,
-                                              orElse: () => NotFoundCommand())
-                                          .run(
-                                            command,
-                                            split,
-                                            overlays,
-                                            this,
-                                          );
-                                      bool first = true;
-                                      currentProcess = stream.listen((element) {
-                                        if (first && element.text!.isNotEmpty) {
-                                          outputs.add(const TextSpan(text: "\n"));
-                                          first = false;
-                                        }
-                                        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                                          widget.focusNode.requestFocus();
-                                        });
-                                        setState(() {
-                                          outputs.add(element);
-                                          Future.delayed(const Duration(milliseconds: 50), () {
-                                            if (scrollLock && overlays.isEmpty) {
-                                              terminalScrollController.jumpTo(
-                                                  terminalScrollController
-                                                      .position.maxScrollExtent);
-                                            }
-                                          });
-                                        });
-                                      });
-                                      currentProcess?.onDone(() {
-                                        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                                          widget.focusNode.requestFocus();
-                                        });
-                                        if (scrollLock && overlays.isEmpty) {
-                                          Future.delayed(const Duration(milliseconds: 50), () {
-                                            terminalScrollController.jumpTo(
-                                                terminalScrollController.position.maxScrollExtent);
-                                          });
-                                        }
-                                      });
-                                    }
-
-                                    widget.focusNode.requestFocus();
-                                    terminalTextController.clear();
-                                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                                      if(overlays.isEmpty) {
-
-                                      terminalScrollController.jumpTo(
-                                          terminalScrollController.position.maxScrollExtent);
-                                      }
-                                    });
-                                    // cwd = FS.fileSystem.directory("/home")
-                                  },
+                                  onSubmitted: _handleSubmit,
                                   keyboardType: TextInputType.text,
                                   maxLines: null,
                                   style: textStyle,
@@ -274,6 +207,74 @@ class TerminalState extends ConsumerState<Terminal> {
             ),
           )
         : overlays.last;
+  }
+
+  void _handleSubmit(command) {
+    setState(() {
+      if (outputs.isNotEmpty) {
+        outputs.add(const TextSpan(text: "\n"));
+      }
+      outputs.add(_prefix);
+      outputs.add(TextSpan(
+        text: command,
+        style: GoogleFonts.ubuntuMono()
+            .copyWith(color: Colors.white, fontSize: 16),
+      ));
+    });
+    if (command.isNotEmpty) {
+      var split = command.split(" ");
+      command = split.removeAt(0);
+      Stream<TextSpan>? stream = TerminalCommands.commands
+          .firstWhere((element) => element.command == command,
+          orElse: () => NotFoundCommand())
+          .run(
+        command,
+        split,
+        overlays,
+        this,
+      );
+      bool first = true;
+      currentProcess = stream.listen((element) {
+        if (first && element.text!.isNotEmpty) {
+          outputs.add(const TextSpan(text: "\n"));
+          first = false;
+        }
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          widget.focusNode.requestFocus();
+        });
+        setState(() {
+          outputs.add(element);
+          Future.delayed(const Duration(milliseconds: 50), () {
+            if (scrollLock && overlays.isEmpty) {
+              terminalScrollController.jumpTo(
+                  terminalScrollController
+                      .position.maxScrollExtent);
+            }
+          });
+        });
+      });
+      currentProcess?.onDone(() {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          widget.focusNode.requestFocus();
+        });
+        if (scrollLock && overlays.isEmpty) {
+          Future.delayed(const Duration(milliseconds: 50), () {
+            terminalScrollController.jumpTo(
+                terminalScrollController.position.maxScrollExtent);
+          });
+        }
+      });
+    }
+
+    widget.focusNode.requestFocus();
+    terminalTextController.clear();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if(overlays.isEmpty) {
+
+        terminalScrollController.jumpTo(
+            terminalScrollController.position.maxScrollExtent);
+      }
+    });
   }
 }
 
