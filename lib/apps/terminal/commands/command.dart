@@ -3,7 +3,9 @@ import 'dart:collection';
 import 'package:dart_eval/dart_eval.dart';
 import 'package:file/file.dart';
 import 'package:flutter/material.dart';
+import 'package:fubuntu/apps/fimp/fimp.dart';
 import 'package:fubuntu/apps/terminal/nano.dart';
+import 'package:fubuntu/desktop.dart';
 import 'package:fubuntu/fs/fs.dart';
 
 import '../terminal.dart';
@@ -20,6 +22,7 @@ class TerminalCommands {
     SLEEP(),
     DART(),
     CLEAR(),
+    FIMP(),
   ];
 }
 
@@ -197,6 +200,23 @@ class CLEAR extends TerminalCommand {
   @override
   Stream<TextSpan> run(
       String command, List<String> args, ListQueue<Widget> overlays, TerminalState state) async* {
-      state.outputs.clear();
+    state.outputs.clear();
+  }
+}
+
+class FIMP extends TerminalCommand {
+  FIMP() : super(command: "fimp");
+
+  @override
+  Stream<TextSpan> run(
+      String command, List<String> args, ListQueue<Widget> overlays, TerminalState state) async* {
+    var read = state.ref.read(windowManagerProvider.notifier);
+    var window = Window(
+      read.update!,
+    );
+    var fimp = Fimp(window: window,);
+    window.windowProperties.application = fimp;
+    window.windowProperties.title = fimp.appName;
+    read.addWindow(window);
   }
 }
