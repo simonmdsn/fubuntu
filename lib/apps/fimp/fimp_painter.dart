@@ -1,44 +1,56 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class FimpPainter extends CustomPainter {
-  List<Offset> points;
+import 'drawing.dart';
 
-  FimpPainter(this.points);
+class FimpPainter extends CustomPainter {
+  List<Drawing> drawings;
+
+  final TextPainter textPainter = TextPainter(
+    text: const TextSpan(text: "Hello, world!",style: TextStyle(color: Colors.black)),
+    textDirection: TextDirection.ltr,
+  );
+
+  FimpPainter(this.drawings);
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (var i = 0; i < points.length - 1; i++) {
-      var path = Path();
-      path.moveTo(points[0].dx, points[0].dy);
+    textPainter.layout(minWidth: 0, maxWidth:size.width);
+    textPainter.paint(canvas, Offset(10, 10));
+    for (var drawing in drawings) {
+      for (var i = 0; i < drawing.length - 1; i++) {
+        var path = Path();
+        path.moveTo(drawing[0].dx, drawing[0].dy);
 
-      if (points.length < 2) {
-        path.addOval(Rect.fromCircle(center: points[i], radius: 5));
+        if (drawing.length < 2) {
+          path.addOval(Rect.fromCircle(center: Offset(drawing[0].dx,drawing[0].dy), radius: 1));
+        }
+
+        for (int i = 1; i < drawing.length - 1; ++i) {
+          final p0 = drawing[i];
+          final p1 = drawing[i + 1];
+          path.quadraticBezierTo(
+            p0.dx,
+            p0.dy,
+            (p0.dx + p1.dx) / 2,
+            (p0.dy + p1.dy) / 2,
+          );
+        }
+
+        canvas.drawPath(
+            path,
+            Paint()
+              ..color = drawing.color
+              ..strokeWidth = drawing.size
+              ..style = PaintingStyle.stroke
+              ..strokeCap = StrokeCap.round);
+
       }
-
-      for (int i = 1; i < points.length - 1; ++i) {
-        final p0 = points[i];
-        final p1 = points[i + 1];
-        path.quadraticBezierTo(
-          p0.dx,
-          p0.dy,
-          (p0.dx + p1.dx) / 2,
-          (p0.dy + p1.dy) / 2,
-        );
-      }
-      // path.lineTo(points[i + 1].dx, points[i + 1].dy);
-      // path.addOval(Rect.fromCircle(center: points[i], radius: 5));
-
-      canvas.drawPath(
-          path,
-          Paint()
-            ..color = Colors.black
-            ..strokeWidth = 5
-            ..strokeCap = StrokeCap.round);
     }
   }
 
   @override
   bool shouldRepaint(covariant FimpPainter oldDelegate) {
-    return oldDelegate.points != points;
+    return true;
   }
 }

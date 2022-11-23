@@ -5,6 +5,8 @@ import 'package:fubuntu/apps/desktop_dock.dart';
 import 'package:fubuntu/apps/terminal/terminal.dart';
 import 'package:fubuntu/desktop_clock.dart';
 
+import 'apps/fimp/fimp.dart';
+
 class Desktop extends ConsumerStatefulWidget {
   const Desktop({super.key});
 
@@ -37,6 +39,19 @@ class DesktopState extends ConsumerState<Desktop> {
         const Duration(milliseconds: 10),
         () => OpenTerminalAction(ref.read(windowManagerProvider.notifier))
             .invoke(const OpenTerminalIntent()));
+
+    Future.delayed(
+        const Duration(milliseconds: 10),
+            () {
+              var read = ref.read(windowManagerProvider.notifier);
+              var window = Window(
+                read.update!,
+              );
+              var fimp = Fimp(window: window,);
+              window.windowProperties.application = fimp;
+              window.windowProperties.title = fimp.appName;
+              read.addWindow(window);
+            });
   }
 
   @override
@@ -446,7 +461,7 @@ class WindowState extends ConsumerState<Window> {
 
   void onHorizontalDragLeft(DragUpdateDetails details) {
     resizing = true;
-    if (widget.windowProperties.width - details.delta.dx <= 100) {
+    if (widget.windowProperties.width - details.delta.dx <= 200) {
       return;
     }
     setState(() {
@@ -458,6 +473,9 @@ class WindowState extends ConsumerState<Window> {
 
   void onHorizontalDragRight(DragUpdateDetails details) {
     resizing = true;
+    if (widget.windowProperties.width - details.delta.dx <= 200) {
+      return;
+    }
     setState(() {
       widget.windowProperties.width += details.delta.dx;
     });

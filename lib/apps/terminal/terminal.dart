@@ -123,6 +123,7 @@ class TerminalState extends ConsumerState<Terminal> {
                   currentProcess?.cancel();
                   setState(() {
                     outputs.add(TextSpan(text: "\n^C", style: textStyle));
+                    terminalTextController.clear();
                   });
                   if (scrollLock) {
                     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
