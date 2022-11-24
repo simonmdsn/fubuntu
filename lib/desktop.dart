@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fubuntu/apps/desktop_dock.dart';
 import 'package:fubuntu/apps/terminal/terminal.dart';
 import 'package:fubuntu/desktop_clock.dart';
+import 'package:fubuntu/desktop_shortcut.dart';
 
 import 'apps/fimp/fimp.dart';
 
@@ -40,18 +41,18 @@ class DesktopState extends ConsumerState<Desktop> {
         () => OpenTerminalAction(ref.read(windowManagerProvider.notifier))
             .invoke(const OpenTerminalIntent()));
 
-    Future.delayed(
-        const Duration(milliseconds: 10),
-            () {
-              var read = ref.read(windowManagerProvider.notifier);
-              var window = Window(
-                read.update!,
-              );
-              var fimp = Fimp(window: window,);
-              window.windowProperties.application = fimp;
-              window.windowProperties.title = fimp.appName;
-              read.addWindow(window);
-            });
+    Future.delayed(const Duration(milliseconds: 10), () {
+      var read = ref.read(windowManagerProvider.notifier);
+      var window = Window(
+        read.update!,
+      );
+      var fimp = Fimp(
+        window: window,
+      );
+      window.windowProperties.application = fimp;
+      window.windowProperties.title = fimp.appName;
+      read.addWindow(window);
+    });
   }
 
   @override
@@ -108,6 +109,39 @@ class DesktopState extends ConsumerState<Desktop> {
                             fit: BoxFit.cover,
                           ),
                         ),
+                        Positioned(
+                          left: 0,
+                          top: 0,
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height - 20,
+                          child: GridView.count(
+                              crossAxisCount: 16,
+
+                              children: [
+                                DesktopShortcut(
+                                    icon: const Icon(Icons.terminal),
+                                    name: "Terminal",
+                                    onPressed: () {
+                                      OpenTerminalAction(ref.read(windowManagerProvider.notifier))
+                                          .invoke(const OpenTerminalIntent());
+                                    }),
+                                DesktopShortcut(
+                                    icon: const Icon(Icons.palette),
+                                    name: "FIMP",
+                                    onPressed: () {
+                                      var read = ref.read(windowManagerProvider.notifier);
+                                      var window = Window(
+                                        read.update!,
+                                      );
+                                      var fimp = Fimp(
+                                        window: window,
+                                      );
+                                      window.windowProperties.application = fimp;
+                                      window.windowProperties.title = fimp.appName;
+                                      read.addWindow(window);
+                                    }),
+                              ],),
+                        ),
                         ...windowManager
                             .map((e) => Positioned(
                                   left: e.windowProperties.x,
@@ -151,7 +185,6 @@ class DesktopState extends ConsumerState<Desktop> {
       showDock = false;
     });
   }
-
 }
 
 class WindowManagerNotifier extends StateNotifier<List<Window>> {
@@ -532,7 +565,8 @@ abstract class Application extends ConsumerStatefulWidget {
   final IconData icon;
   final String appName;
 
-  const Application({super.key, required this.appName, required this.focusNode, required this.icon});
+  const Application(
+      {super.key, required this.appName, required this.focusNode, required this.icon});
 }
 
 class LoggingActionDispatcher extends ActionDispatcher {
